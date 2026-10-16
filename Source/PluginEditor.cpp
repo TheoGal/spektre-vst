@@ -18,7 +18,7 @@ SpektreEditor::SpektreEditor (SpektreProcessor& p)
     addCombo (rangeBox, rangeLabel, "Range",
               { { 60, "0 to -60 dB" }, { 80, "0 to -80 dB" }, { 100, "0 to -100 dB" }, { 120, "0 to -120 dB" } }, -settings.floorDb);
     addCombo (chanBox, chanLabel, "Channel",
-              { { 1, "L+R mix" }, { 2, "Left" }, { 3, "Right" }, { 4, "Side (L-R)" } }, settings.channel + 1);
+              { { 1, "L+R mix" }, { 2, "Left" }, { 3, "Right" } }, settings.channel + 1);
 
     smoothLabel.setFont (Fonts::label (13.0f).withExtraKerningFactor (0.09f));
     addAndMakeVisible (smoothLabel);

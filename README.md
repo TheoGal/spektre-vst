@@ -19,7 +19,7 @@ Im into web developing the last 10 years but this app was 100% vibe-coded with C
 - **Display modes:** line, or 1/3, 1/6 and 1/12-octave bars, with optional peak hold (decay or max).
 - **Live stats:** RMS and sample-peak meters.
 - **Resolution control:** FFT size from 2048 to 32768, with the bin resolution shown live.
-- **Analysis options:** dB/oct slope, channel select (L+R, Left, Right, Side), smoothing, display range and freeze.
+- **Analysis options:** dB/oct slope, channel select (L+R, Left or Right), smoothing, display range and freeze.
 - **Spectrogram:** an optional scrolling view under the main plot.
 - **Cursor readout:** hover the plot for frequency, level and note.
 - **Remembers its view:** settings are saved with your project, per plugin instance.

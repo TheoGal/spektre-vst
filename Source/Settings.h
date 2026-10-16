@@ -11,7 +11,7 @@ struct Settings
     float slope     = 4.5f;   // dB per octave, pivot 1 kHz (display only)
     int   peakHold  = 1;      // 0 off, 1 decay, 2 max hold
     int   floorDb   = -100;   // bottom of the plot
-    int   channel   = 0;      // 0 L+R, 1 L, 2 R, 3 Side (L-R)
+    int   channel   = 0;      // 0 L+R, 1 L, 2 R
     bool  spectrogram = false;
 
     juce::ValueTree toTree() const
@@ -39,7 +39,7 @@ struct Settings
         s.slope       = (float) t.getProperty ("slope", s.slope);
         s.peakHold    = juce::jlimit (0, 2, (int) t.getProperty ("peak", s.peakHold));
         s.floorDb     = juce::jlimit (-120, -60, (int) t.getProperty ("floor", s.floorDb));
-        s.channel     = juce::jlimit (0, 3, (int) t.getProperty ("chan", s.channel));
+        s.channel     = juce::jlimit (0, 2, (int) t.getProperty ("chan", s.channel));
         s.spectrogram = (bool) t.getProperty ("sg", s.spectrogram);
         return s;
     }

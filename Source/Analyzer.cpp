@@ -57,8 +57,7 @@ float Analyzer::sampleChannel (int idx, int channel) const
     {
         case 1:  return l;
         case 2:  return r;
-        case 3:  return 0.5f * (l - r);   // side
-        default: return 0.5f * (l + r);   // mid / mono mix (what Web Audio's downmix does)
+        default: return 0.5f * (l + r);   // L+R mix (what Web Audio's downmix does)
     }
 }
 
