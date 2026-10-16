@@ -1,9 +1,22 @@
 #include "PluginEditor.h"
 
+#if JucePlugin_Build_Standalone
+ #include <juce_audio_utils/juce_audio_utils.h>
+ #include <juce_audio_plugin_client/Standalone/juce_StandaloneFilterWindow.h>
+#endif
+
 SpektreEditor::SpektreEditor (SpektreProcessor& p)
     : AudioProcessorEditor (p), proc (p), settings (p.getSettings())
 {
     setLookAndFeel (&lnf);
+
+   #if JucePlugin_Build_Standalone
+    // JUCE's standalone wrapper mutes the input by default to prevent feedback. Spektre's
+    // standalone app has no output, so there is nothing to feed back: let the input through.
+    if (p.wrapperType == juce::AudioProcessor::wrapperType_Standalone)
+        if (auto* holder = juce::StandalonePluginHolder::getInstance())
+            holder->getMuteInputValue().setValue (false);
+   #endif
     addAndMakeVisible (view);
 
     addCombo (fftBox, fftLabel, "FFT size",

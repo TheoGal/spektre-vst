@@ -79,7 +79,10 @@ void SpectrumView::layoutPlot()
 
     if (! sgArea.isEmpty())
     {
-        sgImage = juce::Image (juce::Image::RGB, juce::jmax (1, sgArea.getWidth()), juce::jmax (1, sgArea.getHeight()), true);
+        // keep this image in normal memory: it is edited pixel by pixel every frame, which
+        // GPU-backed images (Direct2D on Windows) do not preserve
+        sgImage = juce::Image (juce::Image::RGB, juce::jmax (1, sgArea.getWidth()), juce::jmax (1, sgArea.getHeight()),
+                               true, juce::SoftwareImageType());
         juce::Graphics g (sgImage);
         g.fillAll (Palette::bg);
     }
@@ -240,7 +243,7 @@ void SpectrumView::drawSpectrogramColumn()
     if (x1 - x0 < 4) return;
     sgImage.moveImageSection (x0, 0, x0 + 1, 0, x1 - x0 - 1, h);
     const float lr = std::log (fmax / fMin);
-    juce::Image::BitmapData bd (sgImage, juce::Image::BitmapData::writeOnly);
+    juce::Image::BitmapData bd (sgImage, juce::Image::BitmapData::readWrite);
     for (int y = 0; y < h; ++y)
     {
         const float a = (float) (h - 1 - y) / h, b = (float) (h - y) / h;
