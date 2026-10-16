@@ -1,10 +1,24 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-SpektreProcessor::SpektreProcessor()
-    : AudioProcessor (BusesProperties()
-                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true))
+static bool isStandalone()
+{
+    return juce::PluginHostType::getPluginLoadedAs() == juce::AudioProcessor::wrapperType_Standalone;
+}
+
+// In a DAW the plugin sits in the signal chain, so it needs an output and passes audio
+// through untouched. The standalone app only listens: it has no output at all, so it
+// can never feed the input back to the speakers.
+juce::AudioProcessor::BusesProperties SpektreProcessor::makeBuses()
+{
+    auto buses = BusesProperties()
+                   .withInput ("Input", juce::AudioChannelSet::stereo(), true);
+    if (! isStandalone())
+        buses = buses.withOutput ("Output", juce::AudioChannelSet::stereo(), true);
+    return buses;
+}
+
+SpektreProcessor::SpektreProcessor() : AudioProcessor (makeBuses())
 {
 }
 
@@ -12,8 +26,9 @@ bool SpektreProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     const auto in  = layouts.getMainInputChannelSet();
     const auto out = layouts.getMainOutputChannelSet();
-    if (in != out) return false;
-    return in == juce::AudioChannelSet::mono() || in == juce::AudioChannelSet::stereo();
+    if (in != juce::AudioChannelSet::mono() && in != juce::AudioChannelSet::stereo()) return false;
+    if (isStandalone()) return out.isDisabled();   // listen-only
+    return out == in;
 }
 
 void SpektreProcessor::prepareToPlay (double sr, int)
@@ -37,6 +52,9 @@ void SpektreProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::Mid
     const float* l = buffer.getReadPointer (0);
     const float* r = nIn > 1 ? buffer.getReadPointer (1) : l;
     fifo.push (l, r, n);
+
+    if (wrapperType == wrapperType_Standalone)   // belt and braces: never output anything
+        buffer.clear();
 }
 
 juce::AudioProcessorEditor* SpektreProcessor::createEditor()

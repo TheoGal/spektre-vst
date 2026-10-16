@@ -50,6 +50,7 @@ public:
     void releaseResources() override {}
     bool isBusesLayoutSupported (const BusesLayout&) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
+    using AudioProcessor::processBlock;   // keep the double-precision overload visible
 
     juce::AudioProcessorEditor* createEditor() override;
     bool hasEditor() const override { return true; }
@@ -77,6 +78,8 @@ public:
     std::atomic<uint32_t> resetCounter { 0 };   // bumped when the stream restarts
 
 private:
+    static BusesProperties makeBuses();
+
     Settings settings;
     juce::SpinLock settingsLock;
 
