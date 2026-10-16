@@ -1,0 +1,48 @@
+name: Build
+
+# Builds the Windows VST3 (and standalone app) on every push.
+# Pushing a tag like v1.0.0 also publishes a GitHub Release with the zip attached.
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -A x64
+
+      - name: Build
+        run: cmake --build build --config Release --parallel --target Spektre_VST3 Spektre_Standalone
+
+      - name: Package
+        shell: pwsh
+        run: |
+          $out = "Spektre-Windows-x64"
+          New-Item -ItemType Directory -Force -Path $out | Out-Null
+          Copy-Item -Recurse "build/Spektre_artefacts/Release/VST3/Spektre.vst3" $out
+          Copy-Item "build/Spektre_artefacts/Release/Standalone/Spektre.exe" $out
+          Copy-Item LICENSE*, README.md $out -ErrorAction SilentlyContinue
+          Copy-Item -Recurse "Resources/fonts/OFL-*.txt" $out
+          Compress-Archive -Path "$out/*" -DestinationPath "$out.zip" -Force
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Spektre-Windows-x64
+          path: Spektre-Windows-x64.zip
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: Spektre-Windows-x64.zip
+          generate_release_notes: true
