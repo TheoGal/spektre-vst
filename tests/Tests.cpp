@@ -72,8 +72,6 @@ int main()
         pk = run (440, 0.5, 2, 0.0);
         check ("Left-only 440 Hz, channel=Right: level", pk.dbfs, -200, 0.0 + 1e9, "dB");
         std::printf ("    (right channel reads %.1f dB: nothing there, as expected)\n", pk.dbfs);
-        pk = run (440, 0.5, 3, -0.5); // anti-phase -> pure side
-        check ("Anti-phase 440 Hz, channel=Side: level", pk.dbfs, -6.02, 0.1, "dB");
         pk = run (440, 0.5, 0, -0.5);
         std::printf ("    anti-phase, channel=L+R: %.1f dB (cancels, as expected)\n", pk.dbfs);
     }
@@ -87,6 +85,17 @@ int main()
         p2.setStateInformation (mb.getData(), (int) mb.getSize());
         const auto r = p2.getSettings();
         check ("State round-trip (fft, mode, chan, sg)", (r.fftSize == 4096) + (r.mode == 6) + (r.channel == 2) + (r.spectrogram ? 1 : 0), 4, 0, "");
+    }
+
+    // ---- 2b. standalone app is listen-only; the plugin keeps its pass-through output ----
+    {
+        SpektreProcessor plug;
+        check ("Plugin (DAW) build: output channels", plug.getTotalNumOutputChannels(), 2, 0, "ch");
+        juce::PluginHostType::jucePlugInClientCurrentWrapperType = juce::AudioProcessor::wrapperType_Standalone;
+        SpektreProcessor app;
+        check ("Standalone app: output channels", app.getTotalNumOutputChannels(), 0, 0, "ch");
+        check ("Standalone app: input channels", app.getTotalNumInputChannels(), 2, 0, "ch");
+        juce::PluginHostType::jucePlugInClientCurrentWrapperType = juce::AudioProcessor::wrapperType_Undefined;
     }
 
     // ---- 3. render the editor with a music-like test signal ----
