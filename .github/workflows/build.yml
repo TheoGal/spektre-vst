@@ -71,6 +71,10 @@ jobs:
       - name: Build
         run: cmake --build build --config Release --parallel 3 --target Spektre_VST3 Spektre_AU Spektre_Standalone
 
+      # The standalone app reads the audio input: macOS requires a usage description for that
+      - name: Check microphone permission text
+        run: /usr/libexec/PlistBuddy -c "Print :NSMicrophoneUsageDescription" build/Spektre_artefacts/Release/Standalone/Spektre.app/Contents/Info.plist
+
       # Ad-hoc signature: required for Apple Silicon to load the code at all.
       # (Not notarized: that needs a paid Apple Developer account. See INSTALL-macOS.txt.)
       - name: Sign (ad-hoc)
@@ -113,6 +117,9 @@ jobs:
              xattr -dr com.apple.quarantine /Applications/Spektre.app
 
           3. Restart your DAW (Logic: it rescans Audio Units on launch).
+
+          Standalone app: on first launch macOS asks for microphone access. Click Allow,
+          or turn it on later in System Settings > Privacy & Security > Microphone.
           EOF
           ditto -c -k --keepParent "$OUT" "$OUT.zip"
 
