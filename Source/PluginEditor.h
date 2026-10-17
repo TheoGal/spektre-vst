@@ -14,6 +14,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     bool keyPressed (const juce::KeyPress&) override;
+    void parentHierarchyChanged() override;
 
     void timerCallback() override;   // public so the test harness can drive frames
 
@@ -24,6 +25,8 @@ private:
 
     SpektreProcessor& proc;
     SpektreLookAndFeel lnf;
+    WindowButtonsLookAndFeel windowLnf;                       // standalone window only
+    juce::Component::SafePointer<juce::DocumentWindow> hostWindow;
     Analyzer analyzer;
     SpectrumView view;
     Settings settings;

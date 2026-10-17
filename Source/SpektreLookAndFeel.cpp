@@ -110,6 +110,61 @@ void SpektreLookAndFeel::drawButtonText (juce::Graphics& g, juce::TextButton& b,
                 juce::Justification::centredLeft, false);
 }
 
+namespace
+{
+    class TitleBarButton final : public juce::Button
+    {
+    public:
+        TitleBarButton (const juce::String& name, const juce::Path& normal, const juce::Path& toggled)
+            : juce::Button (name), normalShape (normal), toggledShape (toggled) {}
+
+        void paintButton (juce::Graphics& g, bool over, bool down) override
+        {
+            if (over || down)   // soft highlight; the shape itself always stays bright
+            {
+                g.setColour (Palette::trace.withAlpha (down ? 0.32f : 0.18f));
+                g.fillRoundedRectangle (getLocalBounds().toFloat().reduced (2.0f), 3.0f);
+            }
+            auto& p = getToggleState() ? toggledShape : normalShape;
+            const auto area = juce::Justification (juce::Justification::centred)
+                                .appliedToRectangle (juce::Rectangle<int> (getHeight(), getHeight()), getLocalBounds())
+                                .toFloat().reduced ((float) getHeight() * 0.3f);
+            g.setColour (isEnabled() ? Palette::trace : Palette::trace.withAlpha (0.4f));
+            g.fillPath (p, p.getTransformToScaleToFit (area, true));
+        }
+
+    private:
+        juce::Path normalShape, toggledShape;
+    };
+}
+
+juce::Button* WindowButtonsLookAndFeel::createDocumentWindowButton (int buttonType)
+{
+    juce::Path shape;
+    const float t = 0.15f;
+    if (buttonType == juce::DocumentWindow::closeButton)
+    {
+        shape.addLineSegment ({ 0.0f, 0.0f, 1.0f, 1.0f }, t);
+        shape.addLineSegment ({ 1.0f, 0.0f, 0.0f, 1.0f }, t);
+        return new TitleBarButton ("close", shape, shape);
+    }
+    if (buttonType == juce::DocumentWindow::minimiseButton)
+    {
+        shape.addLineSegment ({ 0.0f, 0.5f, 1.0f, 0.5f }, t);
+        return new TitleBarButton ("minimise", shape, shape);
+    }
+    if (buttonType == juce::DocumentWindow::maximiseButton)
+    {
+        shape.addLineSegment ({ 0.5f, 0.0f, 0.5f, 1.0f }, t);
+        shape.addLineSegment ({ 0.0f, 0.5f, 1.0f, 0.5f }, t);
+        juce::Path full;
+        full.addRectangle (0.0f, 0.0f, 1.0f, 1.0f);
+        juce::PathStrokeType (0.15f).createStrokedPath (full, full);
+        return new TitleBarButton ("maximise", shape, full);
+    }
+    return juce::LookAndFeel_V4::createDocumentWindowButton (buttonType);
+}
+
 void SpektreLookAndFeel::drawLinearSlider (juce::Graphics& g, int x, int y, int w, int h, float pos, float, float,
                                            juce::Slider::SliderStyle, juce::Slider&)
 {

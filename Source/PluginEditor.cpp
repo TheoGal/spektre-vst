@@ -72,6 +72,7 @@ SpektreEditor::SpektreEditor (SpektreProcessor& p)
 SpektreEditor::~SpektreEditor()
 {
     stopTimer();
+    if (hostWindow != nullptr) hostWindow->setLookAndFeel (nullptr);
     setLookAndFeel (nullptr);
 }
 
@@ -105,6 +106,19 @@ void SpektreEditor::settingsChanged()
     readouts[5].value = juce::String (analyzer.getSampleRate() / settings.fftSize, 2) + " Hz  "
                         + juce::String (juce::roundToInt (1000.0 * settings.fftSize / analyzer.getSampleRate())) + " ms";
     repaint (readoutArea);
+}
+
+void SpektreEditor::parentHierarchyChanged()
+{
+    // Standalone app only: once we're inside JUCE's window, give it the bright title-bar
+    // buttons. (Inside a DAW the window belongs to the host, so leave it alone.)
+    if (hostWindow != nullptr || proc.wrapperType != juce::AudioProcessor::wrapperType_Standalone)
+        return;
+    if (auto* dw = findParentComponentOfClass<juce::DocumentWindow>())
+    {
+        hostWindow = dw;
+        dw->setLookAndFeel (&windowLnf);   // DocumentWindow rebuilds its buttons on this
+    }
 }
 
 bool SpektreEditor::keyPressed (const juce::KeyPress& k)

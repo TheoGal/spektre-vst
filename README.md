@@ -4,7 +4,7 @@
 
 # SPEKTRE VST3
 
-The [Spektre](https://github.com/TheoGal/spektre) spectrum analyzer as a VST3 plugin, built with JUCE. Put it on any track or bus in your DAW: the audio passes through untouched and Spektre shows its spectrum.
+The [Spektre](https://github.com/TheoGal/spektre) spectrum analyzer as a plugin for Windows and macOS (VST3, plus AU on macOS), built with JUCE. Put it on any track or bus in your DAW: the audio passes through untouched and Spektre shows its spectrum.
 
 ![Spektre VST3](docs/screenshot.png)
 <!-- placeholder: add docs/screenshot.png -->
@@ -33,13 +33,26 @@ Tilting the display by 4.5 dB per octave (the default) makes a balanced mix look
 
 The slope changes only the plot. The peak level and cursor readouts always show the true, unsloped dBFS.
 
-## Install (Windows)
+## Install
 
-1. Download `Spektre-Windows-x64.zip` from the [latest release](https://github.com/TheoGal/spektre-vst/releases/latest).
-2. Copy the `Spektre.vst3` folder to `C:\Program Files\Common Files\VST3\`.
-3. Rescan plugins in your DAW. Spektre shows up as an effect (category: Analyzer).
+Download from the [latest release](https://github.com/TheoGal/spektre-vst/releases/latest).
 
-The zip also contains `Spektre.exe`, a standalone version that analyzes your audio input device.
+**Windows** (`Spektre-Windows-x64.zip`)
+
+1. Copy the `Spektre.vst3` folder to `C:\Program Files\Common Files\VST3\`.
+2. Rescan plugins in your DAW. Spektre shows up as an effect (category: Analyzer).
+
+**macOS** (`Spektre-macOS-universal.zip`, Apple Silicon and Intel)
+
+1. Copy `Spektre.vst3` to `~/Library/Audio/Plug-Ins/VST3/` and, for Logic or GarageBand, `Spektre.component` (Audio Unit) to `~/Library/Audio/Plug-Ins/Components/`.
+2. The builds are not notarized by Apple, so macOS blocks them at first. Run this once in Terminal:
+   ```
+   xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/Spektre.vst3
+   xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/Spektre.component
+   ```
+3. Restart your DAW.
+
+Both zips also contain a standalone app (`Spektre.exe` / `Spektre.app`) that analyzes your audio input device. It has no audio output, so it can't cause feedback.
 
 ## Build it yourself
 
@@ -50,9 +63,9 @@ cmake -S . -B build
 cmake --build build --config Release --target Spektre_VST3
 ```
 
-The plugin ends up in `build/Spektre_artefacts/Release/VST3/`.
+The plugin ends up in `build/Spektre_artefacts/Release/VST3/` (on macOS also `AU/`).
 
-Every push to GitHub builds the Windows version automatically (see the Actions tab). Pushing a tag like `v1.0.0` also publishes a release with the zip attached.
+Every push to GitHub builds the Windows and macOS versions automatically and checks them with [pluginval](https://github.com/Tracktion/pluginval) (see the Actions tab). Pushing a tag like `v1.0.0` also attaches both zips to the release.
 
 ### Tests
 

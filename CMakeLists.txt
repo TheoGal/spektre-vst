@@ -26,7 +26,7 @@ juce_add_plugin(Spektre
     BUNDLE_ID                   "gr.cnnbl.spektre"
     PLUGIN_MANUFACTURER_CODE    Thgl
     PLUGIN_CODE                 Spkt
-    FORMATS                     VST3 Standalone
+    FORMATS                     VST3 AU Standalone
     IS_SYNTH                    FALSE
     NEEDS_MIDI_INPUT            FALSE
     NEEDS_MIDI_OUTPUT           FALSE

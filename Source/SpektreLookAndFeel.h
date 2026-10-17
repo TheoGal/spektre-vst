@@ -39,3 +39,11 @@ public:
                            juce::Slider::SliderStyle, juce::Slider&) override;
     void drawPopupMenuBackground (juce::Graphics&, int w, int h) override;
 };
+
+// Used only for the standalone app's window: the default title-bar buttons (dark red X,
+// dark gold minimise) are hard to see on the dark title bar, so draw them in Spektre yellow.
+class WindowButtonsLookAndFeel : public juce::LookAndFeel_V4
+{
+public:
+    juce::Button* createDocumentWindowButton (int buttonType) override;
+};
