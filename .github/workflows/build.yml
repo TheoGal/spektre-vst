@@ -1,7 +1,9 @@
 name: Build
 
-# Builds the Windows VST3 (and standalone app) on every push.
-# Pushing a tag like v1.0.0 also publishes a GitHub Release with the zip attached.
+# Builds Spektre for Windows (VST3 + standalone) and macOS (VST3 + AU + standalone,
+# universal: Apple Silicon and Intel) on every push, and checks both with pluginval.
+# Pushing a tag like v1.0.0 (or publishing a release with one) also attaches both zips
+# to that GitHub Release.
 on:
   push:
     branches: [main]
@@ -16,13 +18,22 @@ jobs:
   windows:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Configure
         run: cmake -S . -B build -A x64
 
       - name: Build
         run: cmake --build build --config Release --parallel --target Spektre_VST3 Spektre_Standalone
+
+      - name: Validate with pluginval
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          Invoke-WebRequest https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_Windows.zip -OutFile pluginval.zip
+          Expand-Archive pluginval.zip -DestinationPath pluginval
+          ./pluginval/pluginval.exe --strictness-level 10 --validate-in-process --output-dir pluginval-log "build/Spektre_artefacts/Release/VST3/Spektre.vst3"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
 
       - name: Package
         shell: pwsh
@@ -35,14 +46,83 @@ jobs:
           Copy-Item -Recurse "Resources/fonts/OFL-*.txt" $out
           Compress-Archive -Path "$out/*" -DestinationPath "$out.zip" -Force
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: Spektre-Windows-x64
           path: Spektre-Windows-x64.zip
 
       - name: Publish release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: Spektre-Windows-x64.zip
-          generate_release_notes: true
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Configure (universal binary)
+        run: >
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64"
+          -DCMAKE_OSX_DEPLOYMENT_TARGET=10.13
+
+      - name: Build
+        run: cmake --build build --config Release --parallel 3 --target Spektre_VST3 Spektre_AU Spektre_Standalone
+
+      # Ad-hoc signature: required for Apple Silicon to load the code at all.
+      # (Not notarized: that needs a paid Apple Developer account. See INSTALL-macOS.txt.)
+      - name: Sign (ad-hoc)
+        run: |
+          A=build/Spektre_artefacts/Release
+          codesign --force --deep --sign - "$A/VST3/Spektre.vst3"
+          codesign --force --deep --sign - "$A/AU/Spektre.component"
+          codesign --force --deep --sign - "$A/Standalone/Spektre.app"
+
+      - name: Validate with pluginval
+        continue-on-error: true
+        run: |
+          curl -sSfLo pluginval.zip https://github.com/Tracktion/pluginval/releases/download/v1.0.4/pluginval_macOS.zip
+          unzip -q pluginval.zip
+          ./pluginval.app/Contents/MacOS/pluginval --strictness-level 10 --validate-in-process --output-dir pluginval-log build/Spektre_artefacts/Release/VST3/Spektre.vst3
+
+      - name: Package
+        run: |
+          A=build/Spektre_artefacts/Release
+          OUT=Spektre-macOS-universal
+          mkdir -p "$OUT"
+          ditto "$A/VST3/Spektre.vst3"        "$OUT/Spektre.vst3"
+          ditto "$A/AU/Spektre.component"     "$OUT/Spektre.component"
+          ditto "$A/Standalone/Spektre.app"   "$OUT/Spektre.app"
+          cp LICENSE* README.md "$OUT"/ 2>/dev/null || true
+          cp Resources/fonts/OFL-*.txt "$OUT"/
+          cat > "$OUT/INSTALL-macOS.txt" <<'EOF'
+          Spektre for macOS (Apple Silicon and Intel)
+
+          1. Copy the plugins:
+             Spektre.vst3       ->  ~/Library/Audio/Plug-Ins/VST3/
+             Spektre.component  ->  ~/Library/Audio/Plug-Ins/Components/   (AU: Logic, GarageBand)
+             Spektre.app        ->  /Applications/   (optional standalone app)
+
+          2. These builds are not notarized by Apple, so macOS blocks them at first.
+             Open Terminal and run:
+
+             xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/Spektre.vst3
+             xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/Spektre.component
+             xattr -dr com.apple.quarantine /Applications/Spektre.app
+
+          3. Restart your DAW (Logic: it rescans Audio Units on launch).
+          EOF
+          ditto -c -k --keepParent "$OUT" "$OUT.zip"
+
+      - uses: actions/upload-artifact@v7.0.1
+        with:
+          name: Spektre-macOS-universal
+          path: Spektre-macOS-universal.zip
+
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: Spektre-macOS-universal.zip
