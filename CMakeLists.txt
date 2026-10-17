@@ -34,6 +34,9 @@ juce_add_plugin(Spektre
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
     VST3_CATEGORIES             Fx Analyzer
     ICON_BIG                    Resources/icon.png
+    # macOS: an app must say why it wants audio input, or the system blocks it
+    MICROPHONE_PERMISSION_ENABLED TRUE
+    MICROPHONE_PERMISSION_TEXT  "Spektre analyzes the audio from your input device to show its spectrum. Nothing is recorded or sent anywhere."
     COPY_PLUGIN_AFTER_BUILD     FALSE)
 
 juce_add_binary_data(SpektreData SOURCES

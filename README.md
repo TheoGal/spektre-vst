@@ -6,11 +6,11 @@
 
 The [Spektre](https://github.com/TheoGal/spektre) spectrum analyzer as a plugin for Windows and macOS (VST3, plus AU on macOS), built with JUCE. Put it on any track or bus in your DAW: the audio passes through untouched and Spektre shows its spectrum.
 
-![Spektre VST3](docs/screenshot.png)
+![Spektre VST](docs/screenshot.png)
 <!-- placeholder: add docs/screenshot.png -->
 
 ### disclaimer
-Im into web developing the last 10 years but this app was 100% vibe-coded with Claude - I simply inspected the code afterwards.
+Im into web developing the last 10 years but this app was 100% vibe-coded with Claude - I simply inspected the code afterwards. I dont own a Mac so Mac versions are not tested.
 
 ## Features
 
@@ -23,7 +23,6 @@ Im into web developing the last 10 years but this app was 100% vibe-coded with C
 - **Spectrogram:** an optional scrolling view under the main plot.
 - **Cursor readout:** hover the plot for frequency, level and note.
 - **Remembers its view:** settings are saved with your project, per plugin instance.
-- **Resizable window.**
 
 ### dB/oct slope setting
 
@@ -49,8 +48,11 @@ Download from the [latest release](https://github.com/TheoGal/spektre-vst/releas
    ```
    xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/Spektre.vst3
    xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/Spektre.component
+   xattr -dr com.apple.quarantine /Applications/Spektre.app
    ```
 3. Restart your DAW.
+
+The standalone app asks for microphone access on first launch. Click **Allow**, or turn it on later in **System Settings > Privacy & Security > Microphone**.
 
 Both zips also contain a standalone app (`Spektre.exe` / `Spektre.app`) that analyzes your audio input device. It has no audio output, so it can't cause feedback.
 
