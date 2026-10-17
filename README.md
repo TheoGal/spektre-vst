@@ -2,7 +2,7 @@
   <img src="docs/icon-192.png" width="100">
 </p>
 
-# SPEKTRE VST3
+# SPEKTRE VST
 
 The [Spektre](https://github.com/TheoGal/spektre) spectrum analyzer as a plugin for Windows and macOS (VST3, plus AU on macOS), built with JUCE. Put it on any track or bus in your DAW: the audio passes through untouched and Spektre shows its spectrum.
 
