@@ -43,14 +43,16 @@ Download from the [latest release](https://github.com/TheoGal/spektre-vst/releas
 
 **macOS** (`Spektre-macOS-universal.zip`, Apple Silicon and Intel)
 
-1. Copy `Spektre.vst3` to `~/Library/Audio/Plug-Ins/VST3/` and, for Logic or GarageBand, `Spektre.component` (Audio Unit) to `~/Library/Audio/Plug-Ins/Components/`.
+1. Copy `Spektre.vst3` to `/Library/Audio/Plug-Ins/VST3/` and, for Logic or GarageBand, `Spektre.component` (Audio Unit) to `/Library/Audio/Plug-Ins/Components/`. These are in the main `Library` folder at the top of your disk (not the one in your home folder); macOS asks for your password when you copy there.
 2. The builds are not notarized by Apple, so macOS blocks them at first. Run this once in Terminal:
    ```
-   xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/Spektre.vst3
-   xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/Spektre.component
+   xattr -dr com.apple.quarantine /Library/Audio/Plug-Ins/VST3/Spektre.vst3
+   xattr -dr com.apple.quarantine /Library/Audio/Plug-Ins/Components/Spektre.component
    xattr -dr com.apple.quarantine /Applications/Spektre.app
    ```
 3. Restart your DAW.
+
+Prefer to install just for your own user account? The same folders inside your home folder (`~/Library/Audio/Plug-Ins/...`) work too; use those paths in the commands instead.
 
 The standalone app asks for microphone access on first launch. Click **Allow**, or turn it on later in **System Settings > Privacy & Security > Microphone**.
 

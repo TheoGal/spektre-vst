@@ -105,18 +105,24 @@ jobs:
           Spektre for macOS (Apple Silicon and Intel)
 
           1. Copy the plugins:
-             Spektre.vst3       ->  ~/Library/Audio/Plug-Ins/VST3/
-             Spektre.component  ->  ~/Library/Audio/Plug-Ins/Components/   (AU: Logic, GarageBand)
+             Spektre.vst3       ->  /Library/Audio/Plug-Ins/VST3/
+             Spektre.component  ->  /Library/Audio/Plug-Ins/Components/   (AU: Logic, GarageBand)
              Spektre.app        ->  /Applications/   (optional standalone app)
+
+             /Library is the main Library folder at the top of the disk, not the one in
+             your home folder. macOS asks for your password when you copy there.
 
           2. These builds are not notarized by Apple, so macOS blocks them at first.
              Open Terminal and run:
 
-             xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/Spektre.vst3
-             xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/Components/Spektre.component
+             xattr -dr com.apple.quarantine /Library/Audio/Plug-Ins/VST3/Spektre.vst3
+             xattr -dr com.apple.quarantine /Library/Audio/Plug-Ins/Components/Spektre.component
              xattr -dr com.apple.quarantine /Applications/Spektre.app
 
           3. Restart your DAW (Logic: it rescans Audio Units on launch).
+
+          To install for your user account only, use ~/Library/Audio/Plug-Ins/... instead
+          (same folders inside your home folder) in steps 1 and 2.
 
           Standalone app: on first launch macOS asks for microphone access. Click Allow,
           or turn it on later in System Settings > Privacy & Security > Microphone.
